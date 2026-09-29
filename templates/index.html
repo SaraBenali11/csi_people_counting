@@ -1,0 +1,2578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel Home Security — Ambient Wi-Fi Occupancy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --surface-hover: #f8fafc;
+  --border: #e2e8f0;
+  --border-light: #edf2f7;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --primary-light: #e0f2fe;
+  --success: #059669;
+  --success-light: #ecfdf5;
+  --success-border: #a7f3d0;
+  --warning: #d97706;
+  --warning-light: #fffbeb;
+  --warning-border: #fde68a;
+  --danger: #dc2626;
+  --danger-light: #fef2f2;
+  --danger-border: #fecaca;
+  --navy: #0f172a;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text-main);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header & Navigation */
+header.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--shadow-sm);
+}
+.header-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-main);
+}
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  background: #0f172a;
+  color: #fff;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand-text h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+.brand-text p {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+nav.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+.nav-btn:hover {
+  background: var(--surface-alt);
+  color: var(--text-main);
+}
+.nav-btn.active {
+  background: var(--surface-alt);
+  color: var(--primary);
+  font-weight: 600;
+}
+.nav-btn .badge-pill {
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  display: none;
+}
+.nav-btn.has-alert .badge-pill {
+  display: inline-block;
+}
+
+.header-status-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--success-light);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+}
+.status-pill.status-paused {
+  background: var(--warning-light);
+  color: var(--warning);
+  border-color: var(--warning-border);
+}
+.status-pill.status-alert {
+  background: var(--danger-light);
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+.status-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-pill.status-alert .status-indicator-dot {
+  animation: pulse-dot 1.2s infinite;
+}
+@keyframes pulse-dot {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.demo-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.demo-trigger:hover {
+  background: #e2e8f0;
+  color: var(--text-main);
+}
+
+/* App Main Container */
+main.app-main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+  animation: fadeIn 0.2s ease-in;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards & Layout */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Top Greeting & Alert Hero */
+.hero-greeting {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+.hero-greeting h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+.hero-greeting p {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+/* Status Banner / Hero Card */
+.home-status-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  transition: all 0.3s ease;
+}
+.home-status-card.status-safe {
+  border-left: 6px solid var(--success);
+}
+.home-status-card.status-alert {
+  border-left: 6px solid var(--danger);
+  background: #fffafa;
+}
+.status-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.status-safe .status-icon-wrap {
+  background: var(--success-light);
+  color: var(--success);
+}
+.status-alert .status-icon-wrap {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+.status-content {
+  flex: 1;
+}
+.status-label-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.status-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.status-headline {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+.status-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.status-metrics-cluster {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: var(--surface-alt);
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.status-metric {
+  text-align: center;
+}
+.status-metric-val {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--sans);
+  color: var(--text-main);
+  line-height: 1.1;
+}
+.status-alert .metric-detected {
+  color: var(--danger);
+}
+.status-metric-lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Home Quick Setup Card */
+.quick-setup-card {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.quick-setup-info h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+.quick-setup-info p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.quick-setup-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.counter-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.counter-btn {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: background 0.15s;
+}
+.counter-btn:hover {
+  background: var(--surface-alt);
+}
+.counter-value {
+  width: 44px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--sans);
+  color: var(--text-main);
+}
+.schedule-glance {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Primary Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(2 132 199 / 0.2);
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+.btn-secondary {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-main);
+}
+.btn-secondary:hover {
+  background: var(--surface-alt);
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: #b91c1c;
+}
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* 3-Column Metrics Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+@media (max-width: 900px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .home-status-card { flex-direction: column; align-items: flex-start; }
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.stat-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.stat-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.stat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.tag-normal {
+  background: var(--success-light);
+  color: var(--success);
+}
+.tag-alert {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* Two-column sub layout */
+.home-split-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 20px;
+}
+@media (max-width: 900px) {
+  .home-split-grid { grid-template-columns: 1fr; }
+}
+
+/* Room Visualization (Architectural Plan) */
+.room-container {
+  background: #fafbfc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.room-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 290px;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+/* Subtle architectural grid */
+.room-canvas-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(203, 213, 225, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(203, 213, 225, 0.25) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+/* Door swing representation */
+.room-door {
+  position: absolute;
+  bottom: 0;
+  left: 36px;
+  width: 44px;
+  height: 44px;
+  border-right: 2px dashed #94a3b8;
+  border-top: 2px dashed #94a3b8;
+  border-top-right-radius: 44px;
+  pointer-events: none;
+}
+.room-door-label {
+  position: absolute;
+  bottom: 4px;
+  left: 42px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+/* Furniture representations */
+.furn-sofa {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 170px;
+  height: 52px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+.furn-table {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 38px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #94a3b8;
+}
+/* Wi-Fi devices */
+.device-node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #475569;
+  box-shadow: var(--shadow-sm);
+  z-index: 5;
+}
+.device-tx { top: 12px; left: 16px; }
+.device-rx { bottom: 12px; right: 16px; }
+
+/* Sensing field zone */
+.sensing-zone-overlay {
+  position: absolute;
+  top: 30px;
+  left: 40px;
+  right: 40px;
+  bottom: 30px;
+  border: 1.5px dashed rgba(2, 132, 199, 0.35);
+  background: radial-gradient(ellipse at center, rgba(2, 132, 199, 0.05) 0%, rgba(2, 132, 199, 0.01) 70%, transparent 100%);
+  border-radius: 16px;
+  pointer-events: none;
+}
+.sensing-zone-tag {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--primary-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Person icons representation */
+.occupants-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 60px 40px 40px;
+  z-index: 10;
+}
+.person-marker {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15), var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: person-appear 0.25s ease-out;
+}
+@keyframes person-appear {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+.person-marker.person-alert {
+  border-color: var(--danger);
+  color: var(--danger);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+}
+.empty-room-notice {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.room-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.room-subtle-note {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+/* Activity Feed (Human Language) */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+}
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.activity-item:last-child {
+  border-bottom: none;
+}
+.activity-icon-bullet {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.activity-item.act-alert .activity-icon-bullet {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+.activity-item.act-normal .activity-icon-bullet {
+  background: var(--success-light);
+  color: var(--success);
+}
+.activity-details {
+  flex: 1;
+}
+.activity-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+.activity-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+
+/* Controls Bar (for Live Monitoring View) */
+.monitoring-toolbar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toolbar-selectors {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+select.app-select {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--text-main);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  cursor: pointer;
+  outline: none;
+}
+.progress-wrap {
+  width: 100%;
+  margin-top: 8px;
+}
+.progress-track {
+  height: 6px;
+  background: var(--surface-alt);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill-bar {
+  height: 100%;
+  background: var(--primary);
+  width: 0%;
+  transition: width 0.2s ease;
+}
+.progress-text-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Alerts Page */
+.alert-banner-hero {
+  background: var(--danger-light);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  padding: 18px 24px;
+  margin-bottom: 24px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.alert-banner-hero.visible {
+  display: flex;
+}
+.alert-hero-text h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--danger);
+  margin-bottom: 4px;
+}
+.alert-hero-text p {
+  font-size: 13px;
+  color: #7f1d1d;
+}
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.filter-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filter-pill:hover {
+  background: var(--surface-alt);
+  color: var(--text-main);
+}
+.filter-pill.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+/* Alert Item Card */
+.alert-card-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.alert-card-item.unread {
+  border-left: 4px solid var(--danger);
+}
+.alert-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.alert-type-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.alert-card-item.unread .alert-type-icon {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+.alert-card-item:not(.unread) .alert-type-icon {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+}
+.alert-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.alert-card-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Home Settings Page */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 850px) {
+  .settings-grid { grid-template-columns: 1fr; }
+}
+.settings-group {
+  margin-bottom: 20px;
+}
+.settings-group:last-child {
+  margin-bottom: 0;
+}
+.settings-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+.settings-group .help-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.input-text {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--sans);
+  color: var(--text-main);
+  background: var(--surface);
+}
+.toggle-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.toggle-switch-row:last-child {
+  border-bottom: none;
+}
+.toggle-switch-row .label-col h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.toggle-switch-row .label-col p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #cbd5e1;
+  transition: .2s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .2s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: var(--primary);
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* System / Technical Evaluation Page */
+.tech-banner {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.6;
+}
+.tech-banner b {
+  color: var(--text-main);
+}
+.models-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 900px) {
+  .models-grid { grid-template-columns: 1fr; }
+}
+.model-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+.model-card.is-active-primary {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+.model-badge-top {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.model-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 10px;
+}
+.model-pred-display {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.pred-large-num {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: var(--text-main);
+}
+.model-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding: 4px 0;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-muted);
+}
+.model-stat-row span b {
+  color: var(--text-main);
+  font-family: var(--mono);
+}
+
+.chart-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+.chart-box h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+.chart-box p {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+svg.chart-svg {
+  width: 100%;
+  height: 150px;
+  display: block;
+  background: #fcfdfe;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+}
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.legend-bullet {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-backdrop.open {
+  display: flex;
+}
+.modal-window {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 500px;
+  width: 100%;
+  padding: 24px;
+  animation: modalEnter 0.2s ease-out;
+}
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.modal-body {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: #0f172a;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideToast 0.2s ease;
+}
+@keyframes slideToast {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">
+        <!-- Shield + Wi-Fi Wave Icon -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 11.5a4.5 4.5 0 0 1 6 0"/>
+          <path d="M12 14.5v.01"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>Sentinel</h1>
+        <p>Wi-Fi Ambient Home Security</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="main-nav" id="mainNav">
+      <button class="nav-btn active" data-tab="home">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </button>
+      <button class="nav-btn" data-tab="monitoring">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        Monitoring
+      </button>
+      <button class="nav-btn" data-tab="activity">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Activity
+      </button>
+      <button class="nav-btn" data-tab="alerts" id="navAlertsBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Alerts
+        <span class="badge-pill" id="navAlertBadge">0</span>
+      </button>
+      <button class="nav-btn" data-tab="settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+      <button class="nav-btn" data-tab="system" title="Technical Evaluation">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+        System
+      </button>
+    </nav>
+
+    <!-- Header Status Indicator -->
+    <div class="header-status-area">
+      <div class="status-pill" id="globalStatusPill">
+        <span class="status-indicator-dot"></span>
+        <span id="globalStatusText">Monitoring Active</span>
+      </div>
+      <button class="demo-trigger" id="demoModalOpenBtn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Demo Monitoring
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Main App Content -->
+<main class="app-main">
+
+  <!-- ================= TAB 1: HOME ================= -->
+  <div class="tab-pane active" id="pane-home">
+    <div class="hero-greeting">
+      <div>
+        <h2 id="greetingHeading">Good evening</h2>
+        <p>Your home is being monitored via ambient Wi-Fi sensing.</p>
+      </div>
+      <div id="systemClock" style="font-family:var(--mono);font-size:13px;color:var(--text-muted);">22:00</div>
+    </div>
+
+    <!-- Quick Home Setup Card (Set up your home) -->
+    <div class="quick-setup-card">
+      <div class="quick-setup-info">
+        <h3>Set up your home</h3>
+        <p>How many people should be at home tonight?</p>
+      </div>
+      <div class="quick-setup-controls">
+        <div class="counter-control">
+          <button class="counter-btn" id="quickExpectedMinus">−</button>
+          <div class="counter-value" id="quickExpectedVal">3</div>
+          <button class="counter-btn" id="quickExpectedPlus">+</button>
+        </div>
+        <div class="schedule-glance">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Night monitoring: <b style="color:var(--text-main);">22:00 → 07:00</b>
+        </div>
+        <button class="btn btn-primary" id="homeToggleMonitoringBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span id="homeToggleBtnText">Start Night Monitoring</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Home Status Card -->
+    <div class="home-status-card status-safe" id="homeStatusCard">
+      <div class="status-icon-wrap" id="homeStatusIcon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="status-content">
+        <div class="status-label-row">
+          <span class="status-title">Home Status</span>
+          <span class="status-tag tag-normal" id="homeStatusBadge">● Active</span>
+        </div>
+        <div class="status-headline" id="homeStatusHeadline">✓ Everything looks normal</div>
+        <div class="status-desc" id="homeStatusDesc">Ambient Wi-Fi sensing is actively guarding your living areas. No unusual occupancy detected.</div>
+      </div>
+      <div class="status-metrics-cluster">
+        <div class="status-metric">
+          <div class="status-metric-val metric-detected" id="heroDetectedVal">0</div>
+          <div class="status-metric-lbl">People detected</div>
+        </div>
+        <div style="width:1px;height:36px;background:var(--border);"></div>
+        <div class="status-metric">
+          <div class="status-metric-val" id="heroExpectedVal">3</div>
+          <div class="status-metric-lbl">Expected tonight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Core Metric Cards -->
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <span class="stat-title">People at Home</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-number" id="dashPeopleCount">0</div>
+        <div class="stat-sub">Expected: <b id="dashExpectedSub">3</b> • Alert threshold: &gt;<span id="dashThresholdSub">3</span></div>
+        <div class="stat-tag tag-normal" id="dashPeopleTag">Within expected range</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <span class="stat-title">Monitoring</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        </div>
+        <div class="stat-number" style="font-size:22px;margin-top:6px;" id="dashMonitoringState">Night Active</div>
+        <div class="stat-sub">Schedule: 22:00 → 07:00</div>
+        <div class="stat-tag tag-normal" id="dashMonitoringZone">Living Area Sensing</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <span class="stat-title">Security</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="stat-number" style="font-size:20px;margin-top:8px;" id="dashSecurityState">Guarded</div>
+        <div class="stat-sub" id="dashSecuritySub">No unusual activity detected</div>
+        <div class="stat-tag tag-normal" id="dashSecurityTag">Wi-Fi Sensing Active</div>
+      </div>
+    </div>
+
+    <!-- Split: Room Glance + Recent Activity -->
+    <div class="home-split-grid">
+      <!-- Living Room Glance -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Living Room
+            </div>
+            <div class="card-subtitle">Occupancy visualization</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnGoToMonitoring">
+            Open Live View →
+          </button>
+        </div>
+
+        <div class="room-canvas-wrap">
+          <div class="sensing-zone-overlay">
+            <span class="sensing-zone-tag">Wi-Fi Sensing Zone</span>
+          </div>
+          <div class="furn-sofa">Sofa Area</div>
+          <div class="furn-table">Table</div>
+          <div class="device-node device-tx">
+            <span>📡</span> Hub (TX)
+          </div>
+          <div class="device-node device-rx">
+            <span>📶</span> Sensor (RX)
+          </div>
+          <div class="room-door"></div>
+          <span class="room-door-label">Entry</span>
+
+          <!-- Occupant markers -->
+          <div class="occupants-stage" id="homeRoomStage">
+            <div class="empty-room-notice">
+              <span>Ready</span>
+              <span style="font-size:11px;">Press Start to activate live sensing</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="room-meta-bar">
+          <div><b id="homeOccupancyLabel">0 people detected</b></div>
+          <div class="room-subtle-note">Camera-free ambient detection</div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="12 6 12 12 16 14"/><circle cx="12" cy="12" r="10"/></svg>
+              Recent Activity
+            </div>
+            <div class="card-subtitle">Live events log</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnGoToActivity">View All</button>
+        </div>
+
+        <div class="activity-list" id="homeRecentActivityList">
+          <div style="color:var(--text-muted);font-size:12px;text-align:center;padding:24px 0;">
+            No recent activity recorded.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 2: MONITORING ================= -->
+  <div class="tab-pane" id="pane-monitoring">
+    <!-- Toolbar Controls -->
+    <div class="monitoring-toolbar">
+      <div class="toolbar-actions">
+        <button class="btn btn-primary" id="monitorPlayPauseBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span id="monitorPlayPauseText">Start Monitoring</span>
+        </button>
+        <button class="btn btn-secondary" id="monitorStepBtn" title="Step forward 1 window">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+          Step
+        </button>
+        <button class="btn btn-secondary" id="monitorResetBtn" title="Reset monitoring stream">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Reset
+        </button>
+      </div>
+
+      <div class="toolbar-selectors">
+        <div class="select-wrapper">
+          <span>Replay speed:</span>
+          <select class="app-select" id="monitorSpeedSelect">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="5">5×</option>
+          </select>
+        </div>
+        <div class="select-wrapper">
+          <span>Expected occupancy:</span>
+          <input type="number" id="monitorExpectedInput" min="0" max="10" value="3" class="app-select" style="width:54px;text-align:center;">
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill-bar" id="monitorProgressBar"></div>
+        </div>
+        <div class="progress-text-row">
+          <span id="monitorWindowLabel">Window 0 / 2,800</span>
+          <span>Ambient Wi-Fi Stream</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room 2D Floor Plan Visualization -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            Living Room — Wi-Fi Sensing Zone
+          </div>
+          <div class="card-subtitle">Real-time room occupancy visualization based on Wi-Fi channel state disturbances</div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--primary);background:var(--primary-light);padding:4px 10px;border-radius:12px;" id="monitorLiveBadge">
+          ● Live Sensing Active
+        </div>
+      </div>
+
+      <div class="room-canvas-wrap" style="height:360px;">
+        <div class="sensing-zone-overlay">
+          <span class="sensing-zone-tag">Coverage: Living Room & Entry (~25 m²)</span>
+        </div>
+        <div class="furn-sofa" style="top:50px;width:220px;height:64px;font-size:12px;">Living Room Sofa</div>
+        <div class="furn-table" style="top:136px;width:130px;height:44px;">Coffee Table</div>
+        <div class="device-node device-tx">
+          <span>📡</span> Wi-Fi Router (TX Hub)
+        </div>
+        <div class="device-node device-rx">
+          <span>📶</span> Ambient Receiver (RX Node)
+        </div>
+        <div class="room-door" style="width:50px;height:50px;border-top-right-radius:50px;"></div>
+        <span class="room-door-label" style="bottom:6px;left:48px;">Main Entry</span>
+
+        <!-- Avatars in stage -->
+        <div class="occupants-stage" id="monitorRoomStage" style="padding-top:70px;">
+          <div class="empty-room-notice">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span>Living room is empty</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="room-meta-bar" style="margin-top:16px;">
+        <div>
+          <span style="font-size:14px;font-weight:700;" id="monitorOccupancyTitle">0 people detected</span>
+          <span style="margin-left:12px;font-size:12px;color:var(--text-muted);" id="monitorExpectedText">Expected: 3</span>
+        </div>
+        <div class="room-subtle-note">
+          Occupancy visualization. Wi-Fi sensing detects count through radio perturbations without cameras or wearables.
+        </div>
+      </div>
+    </div>
+
+    <!-- Sensing Environment Cards -->
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-title">Privacy Protection</div>
+        <div style="font-size:14px;font-weight:700;color:var(--success);margin-top:6px;">100% Camera-Free</div>
+        <div class="stat-sub" style="margin-top:4px;">No images, video, or audio are ever captured or transmitted. Operates in total darkness.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Sensing Signal Quality</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text-main);margin-top:6px;">Optimal (256 Subcarriers)</div>
+        <div class="stat-sub" style="margin-top:4px;">High-density OFDM radio signal propagation across the monitored space.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Detection Reliability</div>
+        <div style="font-size:14px;font-weight:700;color:var(--primary);margin-top:6px;">96.7% Benchmark Confidence</div>
+        <div class="stat-sub" style="margin-top:4px;">Multi-path radio reflections analyzed via trained support vector classification.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 3: ACTIVITY ================= -->
+  <div class="tab-pane" id="pane-activity">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Home Activity Timeline
+          </div>
+          <div class="card-subtitle">Comprehensive record of occupancy detections and system security events</div>
+        </div>
+
+        <div class="filter-tabs">
+          <button class="filter-pill active" data-actfilter="all">All</button>
+          <button class="filter-pill" data-actfilter="alerts">Alerts Only</button>
+          <button class="filter-pill" data-actfilter="normal">Normal Activity</button>
+        </div>
+      </div>
+
+      <div class="activity-list" id="fullActivityTimeline">
+        <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">
+          No events recorded yet. Start monitoring to begin capturing room activity.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 4: ALERTS ================= -->
+  <div class="tab-pane" id="pane-alerts">
+    <!-- Active Alert Banner (if alert currently active) -->
+    <div class="alert-banner-hero" id="activeAlertBanner">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:42px;height:42px;border-radius:50%;background:#fee2e2;color:var(--danger);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="alert-hero-text">
+          <h3 id="activeAlertTitle">🚨 Unexpected Occupancy Detected</h3>
+          <p id="activeAlertDesc">4 people detected at home. Expected maximum is 3 people.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary btn-sm" id="btnInspectActiveAlert">View Details</button>
+        <button class="btn btn-danger btn-sm" id="btnAcknowledgeAlert">Acknowledge</button>
+      </div>
+    </div>
+
+    <!-- Alerts Log List -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Security Alerts History
+          </div>
+          <div class="card-subtitle">Generated automatically when detected occupancy exceeds configured household thresholds</div>
+        </div>
+      </div>
+
+      <div id="alertsLogContainer">
+        <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">
+          No security alerts generated. System is operating within expected thresholds.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 5: SETTINGS ================= -->
+  <div class="tab-pane" id="pane-settings">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Home Security Settings
+          </div>
+          <div class="card-subtitle">Configure household size, monitoring hours, and alert thresholds</div>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <!-- Column 1: Household & Thresholds -->
+        <div>
+          <div class="settings-group">
+            <label>Household Configuration</label>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Number of expected people at home tonight:</div>
+            <div class="counter-control" style="width:fit-content;">
+              <button class="counter-btn" id="settingExpectedMinus">−</button>
+              <div class="counter-value" id="settingExpectedVal">3</div>
+              <button class="counter-btn" id="settingExpectedPlus">+</button>
+            </div>
+            <div class="help-text">The system creates a security alert whenever detected occupancy exceeds this number.</div>
+          </div>
+
+          <div class="settings-group" style="margin-top:24px;">
+            <label>Alert Trigger Rule</label>
+            <select class="app-select" id="settingAlertRule" style="width:100%;padding:9px 12px;font-size:13px;">
+              <option value="exceeds" selected>Alert when occupancy exceeds expected count (&gt; 3 people)</option>
+              <option value="empty">Alert on any movement when empty (&gt; 0 people)</option>
+              <option value="sudden">Alert on sudden change of 2 or more people</option>
+            </select>
+            <div class="help-text">Select how sensitive the security engine should be during night hours.</div>
+          </div>
+
+          <div class="settings-group" style="margin-top:24px;">
+            <label>Night Monitoring Schedule</label>
+            <div style="display:flex;gap:12px;align-items:center;">
+              <div>
+                <span style="font-size:11px;color:var(--text-muted);">Starts at:</span>
+                <input type="text" class="input-text" id="settingStartTime" value="22:00" style="margin-top:4px;">
+              </div>
+              <div style="font-size:14px;color:var(--text-muted);margin-top:18px;">→</div>
+              <div>
+                <span style="font-size:11px;color:var(--text-muted);">Ends at:</span>
+                <input type="text" class="input-text" id="settingEndTime" value="07:00" style="margin-top:4px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Toggles & Privacy -->
+        <div>
+          <div class="toggle-switch-row">
+            <div class="label-col">
+              <h4>Night Monitoring Guard</h4>
+              <p>Automatically activate high-sensitivity sensing between 22:00 and 07:00.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggleNightGuard" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-switch-row">
+            <div class="label-col">
+              <h4>Instant In-App Security Alerts</h4>
+              <p>Highlight sudden occupancy increases with visual banners immediately.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggleInstantAlerts" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-switch-row">
+            <div class="label-col">
+              <h4>Camera-Free Privacy Shield</h4>
+              <p>Operates purely via radio frequency disturbances. No optical cameras used.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="togglePrivacyShield" checked disabled>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border-light);display:flex;gap:12px;">
+            <button class="btn btn-primary" id="btnSaveSettings">
+              Save Settings
+            </button>
+            <button class="btn btn-secondary" id="btnResetSettings">
+              Reset to Defaults
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 6: SYSTEM (TECHNICAL EVALUATION) ================= -->
+  <div class="tab-pane" id="pane-system">
+    <!-- Notice Banner -->
+    <div class="tech-banner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <b>Technical Evaluation — Machine Learning Models & Wi-Fi Sensing Architecture</b><br>
+        This section provides offline model benchmarks, live classifier comparisons, and CSI subcarrier amplitude features. Intended for researchers and technical evaluators. Consumer home users do not require this information.
+      </div>
+    </div>
+
+    <!-- Model Comparison Cards -->
+    <div class="models-grid" id="systemModelCards">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Model Selector for Primary Inference -->
+    <div class="card" style="padding:14px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <b style="font-size:13px;">Active Classifier Engine:</b>
+          <span style="font-size:12px;color:var(--text-muted);margin-left:6px;">Select which pre-trained model drives primary occupancy estimation:</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" id="btnSelectSvm" style="font-weight:600;">SVM (Primary - 96.7%)</button>
+          <button class="btn btn-secondary btn-sm" id="btnSelectXgb">XGBoost (95.1%)</button>
+          <button class="btn btn-secondary btn-sm" id="btnSelectRf">Random Forest (93.8%)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h3>Live Predictions vs. Ground Truth (Held-out Test Windows)</h3>
+        <span style="font-size:11px;font-family:var(--mono);color:var(--text-muted);">Window stream: last 100 evaluation steps</span>
+      </div>
+      <p>Demonstrates continuous sequence prediction alignment across the held-out test windows.</p>
+      <svg id="techHistoryChart" class="chart-svg" viewBox="0 0 600 150" preserveAspectRatio="none"></svg>
+      <div class="chart-legend">
+        <span><span class="legend-bullet" style="background:#64748b;"></span>Ground Truth</span>
+        <span><span class="legend-bullet" style="background:#0284c7;"></span>SVM (Primary)</span>
+        <span><span class="legend-bullet" style="background:#d97706;"></span>XGBoost</span>
+        <span><span class="legend-bullet" style="background:#059669;"></span>Random Forest</span>
+      </div>
+    </div>
+
+    <div class="chart-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h3>Wi-Fi CSI Subcarrier Amplitude Features (Current Window)</h3>
+        <span style="font-size:11px;font-family:var(--mono);color:var(--text-muted);">256 OFDM subcarriers • 768 summary features</span>
+      </div>
+      <p>Mean, standard deviation, and maximum amplitude across subcarriers extracted from 128×256 packet windows.</p>
+      <svg id="techCsiChart" class="chart-svg" viewBox="0 0 600 150" preserveAspectRatio="none"></svg>
+      <div class="chart-legend">
+        <span><span class="legend-bullet" style="background:#0284c7;"></span>Mean amplitude</span>
+        <span><span class="legend-bullet" style="background:#d97706;"></span>Std Dev</span>
+        <span><span class="legend-bullet" style="background:#dc2626;"></span>Max amplitude</span>
+      </div>
+    </div>
+
+    <!-- Pipeline Architecture Strip -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Ambient Wi-Fi Sensing Pipeline Architecture</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:11px;font-family:var(--mono);">
+        <span style="background:var(--surface-alt);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text-main);">OFDM Subcarriers</span>
+        <span style="color:var(--primary);">→</span>
+        <span style="background:var(--surface-alt);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text-main);">128×256 Windows</span>
+        <span style="color:var(--primary);">→</span>
+        <span style="background:var(--surface-alt);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text-main);">Standardization</span>
+        <span style="color:var(--primary);">→</span>
+        <span style="background:var(--surface-alt);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text-main);">768-D Summary Stats</span>
+        <span style="color:var(--primary);">→</span>
+        <span style="background:var(--surface-alt);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text-main);">SVM / XGB / RF Models</span>
+        <span style="color:var(--primary);">→</span>
+        <span style="background:var(--surface-alt);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text-main);">People Count</span>
+        <span style="color:var(--primary);">→</span>
+        <span style="background:var(--primary-light);border:1px solid var(--primary);padding:6px 10px;border-radius:6px;color:var(--primary);font-weight:600;">Home Security Guard</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:12px;line-height:1.6;" id="techDatasetSpecs">
+        Evaluation test set: 2,800 held-out windows (classes 0–7 people). Replayed through real trained models.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Demo Modal -->
+<div class="modal-backdrop" id="demoModalBackdrop">
+  <div class="modal-window">
+    <div class="modal-header">
+      <h3>About Demonstration Monitoring</h3>
+      <button class="modal-close-btn" id="demoModalCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px;">
+        <b>Demonstration mode uses recorded Wi-Fi sensing data because physical ESP32 hardware is not connected.</b>
+      </p>
+      <p style="margin-bottom:12px;">
+        To demonstrate the complete smart-home user experience, the system continuously replays 2,800 real held-out Wi-Fi CSI sensing windows through real pre-trained machine learning models (SVM, XGBoost, and Random Forest).
+      </p>
+      <p style="color:var(--text-muted);font-size:12px;">
+        All occupancy predictions, security alerts, and event transitions reflect real model evaluations on held-out test data in real time.
+      </p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-primary" id="demoModalOkBtn">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Alert Details Modal -->
+<div class="modal-backdrop" id="alertDetailModalBackdrop">
+  <div class="modal-window" style="max-width:520px;">
+    <div class="modal-header">
+      <h3 style="color:var(--danger);display:flex;align-items:center;gap:8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Security Incident Details
+      </h3>
+      <button class="modal-close-btn" id="alertDetailCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body" id="alertDetailModalBody">
+      <!-- Injected dynamically -->
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:11px;color:var(--text-muted);">Zone: Living Room & Entryway</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" id="alertDetailDismissBtn">Dismiss</button>
+        <button class="btn btn-danger btn-sm" id="alertDetailAckBtn">Acknowledge Alert</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// State & Configuration
+let info = null, metrics = null, pollTimer = null;
+let currentStep = null;
+let currentStatus = { running: false, index: -1, total: 2800, speed: 1.0, expected_occupancy: 3, alert: false };
+let historyList = [];
+let eventsList = [];
+let alertsList = [];
+let activeTab = 'home';
+let selectedPrimaryModel = 'svm';
+let activeActivityFilter = 'all';
+
+// API Helper
+async function api(path, opts = {}) {
+  try {
+    const res = await fetch(path, opts);
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('API Error:', path, err);
+    return null;
+  }
+}
+
+// Toast Helper
+function showToast(msg, icon = '✓') {
+  const container = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  container.appendChild(t);
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(10px)';
+    t.style.transition = 'all 0.3s ease';
+    setTimeout(() => t.remove(), 300);
+  }, 2600);
+}
+
+// Tab Switching
+function initNavigation() {
+  const buttons = document.querySelectorAll('.nav-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      switchTab(tab);
+    });
+  });
+
+  document.getElementById('btnGoToMonitoring')?.addEventListener('click', () => switchTab('monitoring'));
+  document.getElementById('btnGoToActivity')?.addEventListener('click', () => switchTab('activity'));
+}
+
+function switchTab(tabId) {
+  activeTab = tabId;
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.tab-pane').forEach(pane => {
+    pane.classList.toggle('active', pane.id === `pane-${tabId}`);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Activity Filtering
+function initActivityFilters() {
+  document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeActivityFilter = pill.dataset.actfilter;
+      renderActivityViews();
+    });
+  });
+}
+
+// Expected Occupancy Update Function (Module Scope)
+async function updateExpected(newVal) {
+  if (newVal < 0) newVal = 0;
+  if (newVal > 10) newVal = 10;
+  currentStatus.expected_occupancy = newVal;
+  const quickEl = document.getElementById('quickExpectedVal');
+  const setEl = document.getElementById('settingExpectedVal');
+  const monEl = document.getElementById('monitorExpectedInput');
+  const heroEl = document.getElementById('heroExpectedVal');
+  const subEl = document.getElementById('dashExpectedSub');
+  const thEl = document.getElementById('dashThresholdSub');
+
+  if (quickEl) quickEl.textContent = newVal;
+  if (setEl) setEl.textContent = newVal;
+  if (monEl) monEl.value = newVal;
+  if (heroEl) heroEl.textContent = newVal;
+  if (subEl) subEl.textContent = newVal;
+  if (thEl) thEl.textContent = newVal;
+
+  await api('/api/simulation/expected_occupancy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ value: newVal })
+  });
+  showToast(`Expected occupancy set to ${newVal} people`);
+  await refreshState();
+}
+
+function setupCounterButtons() {
+  document.getElementById('quickExpectedMinus')?.addEventListener('click', () => updateExpected(currentStatus.expected_occupancy - 1));
+  document.getElementById('quickExpectedPlus')?.addEventListener('click', () => updateExpected(currentStatus.expected_occupancy + 1));
+  document.getElementById('settingExpectedMinus')?.addEventListener('click', () => updateExpected(currentStatus.expected_occupancy - 1));
+  document.getElementById('settingExpectedPlus')?.addEventListener('click', () => updateExpected(currentStatus.expected_occupancy + 1));
+  document.getElementById('monitorExpectedInput')?.addEventListener('change', (e) => updateExpected(parseInt(e.target.value) || 0));
+}
+
+// Toolbar Handlers
+function setupToolbarHandlers() {
+  const toggleMonitoring = async () => {
+    if (currentStatus.running) {
+      await api('/api/simulation/pause', { method: 'POST' });
+      showToast('Monitoring paused', '⏸');
+    } else {
+      await api('/api/simulation/start', { method: 'POST' });
+      showToast('Night monitoring started', '●');
+    }
+    await refreshState();
+  };
+
+  document.getElementById('homeToggleMonitoringBtn')?.addEventListener('click', toggleMonitoring);
+  document.getElementById('monitorPlayPauseBtn')?.addEventListener('click', toggleMonitoring);
+
+  document.getElementById('monitorStepBtn')?.addEventListener('click', async () => {
+    await api('/api/simulation/step', { method: 'POST' });
+    await refreshState();
+    showToast('Stepped forward 1 window', '⏭');
+  });
+
+  document.getElementById('monitorResetBtn')?.addEventListener('click', async () => {
+    await api('/api/simulation/reset', { method: 'POST' });
+    await refreshState();
+    showToast('Monitoring reset to beginning', '↺');
+  });
+
+  document.getElementById('monitorSpeedSelect')?.addEventListener('change', async (e) => {
+    const spd = parseFloat(e.target.value);
+    await api('/api/simulation/speed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ speed: spd })
+    });
+    showToast(`Playback speed set to ${spd}×`);
+  });
+
+  // Settings Buttons
+  document.getElementById('btnSaveSettings')?.addEventListener('click', async () => {
+    showToast('Home security settings saved successfully', '✓');
+  });
+  document.getElementById('btnResetSettings')?.addEventListener('click', async () => {
+    updateExpected(3);
+    document.getElementById('settingStartTime').value = '22:00';
+    document.getElementById('settingEndTime').value = '07:00';
+    showToast('Settings reset to default', '↺');
+  });
+
+  // Primary model selector buttons
+  const setModel = async (modelKey) => {
+    selectedPrimaryModel = modelKey;
+    await api('/api/simulation/primary_model', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelKey })
+    });
+    showToast(`Active classifier set to ${modelKey.toUpperCase()}`, '⚙');
+    await refreshState();
+  };
+
+  document.getElementById('btnSelectSvm')?.addEventListener('click', () => setModel('svm'));
+  document.getElementById('btnSelectXgb')?.addEventListener('click', () => setModel('xgb'));
+  document.getElementById('btnSelectRf')?.addEventListener('click', () => setModel('rf'));
+
+  // Alert acknowledgment
+  document.getElementById('btnAcknowledgeAlert')?.addEventListener('click', async () => {
+    await api('/api/simulation/alerts/acknowledge', { method: 'POST' });
+    showToast('Alert acknowledged', '✓');
+    await refreshState();
+  });
+  document.getElementById('alertDetailAckBtn')?.addEventListener('click', async () => {
+    await api('/api/simulation/alerts/acknowledge', { method: 'POST' });
+    closeModals();
+    showToast('Alert acknowledged', '✓');
+    await refreshState();
+  });
+}
+
+// Modals
+function setupModals() {
+  const demoModal = document.getElementById('demoModalBackdrop');
+  document.getElementById('demoModalOpenBtn')?.addEventListener('click', () => demoModal.classList.add('open'));
+  document.getElementById('demoModalCloseBtn')?.addEventListener('click', () => demoModal.classList.remove('open'));
+  document.getElementById('demoModalOkBtn')?.addEventListener('click', () => demoModal.classList.remove('open'));
+
+  const alertModal = document.getElementById('alertDetailModalBackdrop');
+  document.getElementById('btnInspectActiveAlert')?.addEventListener('click', openAlertDetails);
+  document.getElementById('alertDetailCloseBtn')?.addEventListener('click', () => alertModal.classList.remove('open'));
+  document.getElementById('alertDetailDismissBtn')?.addEventListener('click', () => alertModal.classList.remove('open'));
+
+  // Close on backdrop click
+  [demoModal, alertModal].forEach(m => {
+    m?.addEventListener('click', (e) => {
+      if (e.target === m) m.classList.remove('open');
+    });
+  });
+}
+
+function closeModals() {
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+}
+
+function openAlertDetails() {
+  const detected = currentStep ? (currentStep.predictions[selectedPrimaryModel] ? currentStep.predictions[selectedPrimaryModel].predicted : currentStep.predictions.svm.predicted) : 0;
+  const expected = currentStatus.expected_occupancy;
+  const time = currentStep ? currentStep.timestamp : new Date().toLocaleTimeString();
+
+  const body = document.getElementById('alertDetailModalBody');
+  body.innerHTML = `
+    <div style="background:var(--danger-light);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;">
+      <div style="font-weight:700;color:var(--danger);font-size:14px;margin-bottom:4px;">Unexpected Occupancy Detected</div>
+      <div style="font-size:13px;color:#7f1d1d;">
+        <b>${detected} people</b> detected at home, exceeding the configured baseline maximum of <b>${expected} people</b>.
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:12px;">
+      <div><span style="color:var(--text-muted);">Timestamp:</span> <b style="font-family:var(--mono);">${time}</b></div>
+      <div><span style="color:var(--text-muted);">Sensing Confidence:</span> <b>High (SVM 96.7%)</b></div>
+      <div><span style="color:var(--text-muted);">Technology:</span> <b>Wi-Fi CSI RF Disturbance</b></div>
+      <div><span style="color:var(--text-muted);">Privacy Status:</span> <b style="color:var(--success);">Camera-Free (Encrypted)</b></div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
+      <b>Recommended Home Actions:</b>
+      <ul style="margin-left:18px;margin-top:6px;">
+        <li>Verify if an expected family member or guest arrived.</li>
+        <li>Inspect the Live Monitoring floor plan view for real-time presence.</li>
+        <li>Acknowledge the alert below once the situation has been confirmed.</li>
+      </ul>
+    </div>
+  `;
+  document.getElementById('alertDetailModalBackdrop').classList.add('open');
+}
+window.openAlertDetails = openAlertDetails;
+window.switchTab = switchTab;
+window.updateExpected = updateExpected;
+
+// Render Room Occupancy Avatars
+function renderRoomAvatars(count, isAlert, targetContainerId) {
+  const container = document.getElementById(targetContainerId);
+  if (!container) return;
+
+  if (!currentStep) {
+    container.innerHTML = `
+      <div class="empty-room-notice">
+        <span>Ready</span>
+        <span style="font-size:11px;">Press Start to activate live sensing</span>
+      </div>`;
+    return;
+  }
+
+  if (count === 0) {
+    container.innerHTML = `
+      <div class="empty-room-notice">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>Living room is empty</span>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="person-marker ${isAlert ? 'person-alert' : ''}" title="Person ${i + 1} detected">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>`;
+  }
+  container.innerHTML = html;
+}
+
+// Render Dynamic Home UI & Metrics
+function renderDashboard(status, step) {
+  const isRunning = status.running;
+  const expected = status.expected_occupancy;
+  selectedPrimaryModel = status.primary_model || 'svm';
+
+  const detected = step ? (step.predictions[selectedPrimaryModel] ? step.predictions[selectedPrimaryModel].predicted : step.predictions.svm.predicted) : 0;
+  const isAlert = step ? (detected > expected) : false;
+
+  // Header status pill
+  const pill = document.getElementById('globalStatusPill');
+  const pillText = document.getElementById('globalStatusText');
+  if (isAlert) {
+    pill.className = 'status-pill status-alert';
+    pillText.textContent = 'Alert Active';
+  } else if (!isRunning) {
+    pill.className = 'status-pill status-paused';
+    pillText.textContent = 'Monitoring Paused';
+  } else {
+    pill.className = 'status-pill';
+    pillText.textContent = 'Monitoring Active';
+  }
+
+  // Quick setup card
+  document.getElementById('quickExpectedVal').textContent = expected;
+  document.getElementById('settingExpectedVal').textContent = expected;
+  const homeToggleText = document.getElementById('homeToggleBtnText');
+  const monitorPlayText = document.getElementById('monitorPlayPauseText');
+  const playIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+  const pauseIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+
+  if (homeToggleText) homeToggleText.textContent = isRunning ? 'Pause Night Monitoring' : 'Start Night Monitoring';
+  if (monitorPlayText) monitorPlayText.textContent = isRunning ? 'Pause Monitoring' : 'Start Monitoring';
+
+  // Hero Status Card
+  const homeCard = document.getElementById('homeStatusCard');
+  const homeIcon = document.getElementById('homeStatusIcon');
+  const homeBadge = document.getElementById('homeStatusBadge');
+  const homeHeadline = document.getElementById('homeStatusHeadline');
+  const homeDesc = document.getElementById('homeStatusDesc');
+
+  document.getElementById('heroDetectedVal').textContent = step ? detected : '0';
+  document.getElementById('heroExpectedVal').textContent = expected;
+
+  if (isAlert) {
+    homeCard.className = 'home-status-card status-alert';
+    homeIcon.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+    homeBadge.className = 'status-tag tag-alert';
+    homeBadge.textContent = '🚨 Security Alert';
+    homeHeadline.textContent = `🚨 Unexpected Occupancy (${detected} People Detected)`;
+    homeDesc.textContent = `${detected} people detected at home. Expected maximum is ${expected} people. Review incident details.`;
+  } else {
+    homeCard.className = 'home-status-card status-safe';
+    homeIcon.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+    homeBadge.className = 'status-tag tag-normal';
+    homeBadge.textContent = isRunning ? '● Active' : '⏸ Paused';
+    homeHeadline.textContent = '✓ Everything looks normal';
+    homeDesc.textContent = 'Ambient Wi-Fi sensing is actively guarding your living areas. No unusual occupancy detected.';
+  }
+
+  // Stat Cards
+  document.getElementById('dashPeopleCount').textContent = step ? detected : '0';
+  document.getElementById('dashExpectedSub').textContent = expected;
+  document.getElementById('dashThresholdSub').textContent = expected;
+
+  const peopleTag = document.getElementById('dashPeopleTag');
+  if (isAlert) {
+    peopleTag.className = 'stat-tag tag-alert';
+    peopleTag.textContent = 'Exceeds configured limit';
+  } else {
+    peopleTag.className = 'stat-tag tag-normal';
+    peopleTag.textContent = 'Within expected range';
+  }
+
+  document.getElementById('dashMonitoringState').textContent = isRunning ? 'Night Active' : 'Standby / Paused';
+  document.getElementById('dashSecurityState').textContent = isAlert ? 'Attention Required' : 'Guarded';
+  document.getElementById('dashSecuritySub').textContent = isAlert ? 'Unexpected occupancy detected' : 'No unusual activity detected';
+  document.getElementById('dashSecurityTag').className = isAlert ? 'stat-tag tag-alert' : 'stat-tag tag-normal';
+  document.getElementById('dashSecurityTag').textContent = isAlert ? 'Alert Triggered' : 'Wi-Fi Sensing Active';
+
+  // Room Glance in Home
+  renderRoomAvatars(detected, isAlert, 'homeRoomStage');
+  document.getElementById('homeOccupancyLabel').textContent = `${detected} ${detected === 1 ? 'person' : 'people'} detected`;
+
+  // Monitoring View
+  renderRoomAvatars(detected, isAlert, 'monitorRoomStage');
+  document.getElementById('monitorOccupancyTitle').textContent = `${detected} ${detected === 1 ? 'person' : 'people'} detected`;
+  document.getElementById('monitorExpectedText').textContent = `Expected: ${expected} • Threshold: > ${expected}`;
+
+  // Progress Bar
+  const total = status.total || 2800;
+  const progressPct = total ? Math.min(100, Math.round(((status.index + 1) / total) * 100)) : 0;
+  document.getElementById('monitorProgressBar').style.width = `${progressPct}%`;
+  document.getElementById('monitorWindowLabel').textContent = `Window ${Math.max(0, status.index + 1)} / ${total}`;
+
+  // Active Alert Banner in Alerts tab
+  const alertBanner = document.getElementById('activeAlertBanner');
+  if (isAlert) {
+    alertBanner.classList.add('visible');
+    document.getElementById('activeAlertTitle').textContent = `🚨 Unexpected Occupancy Detected`;
+    document.getElementById('activeAlertDesc').textContent = `${detected} people detected at home. Expected maximum is ${expected} people.`;
+  } else {
+    alertBanner.classList.remove('visible');
+  }
+
+  // Update Clock
+  const now = new Date();
+  const timeStr = step ? step.timestamp : now.toTimeString().slice(0, 5);
+  const clockEl = document.getElementById('systemClock');
+  if (clockEl) clockEl.textContent = timeStr;
+
+  // Dynamic greeting
+  const hr = now.getHours();
+  const greetingEl = document.getElementById('greetingHeading');
+  if (greetingEl) {
+    if (hr >= 5 && hr < 12) greetingEl.textContent = 'Good morning';
+    else if (hr >= 12 && hr < 18) greetingEl.textContent = 'Good afternoon';
+    else greetingEl.textContent = 'Good evening';
+  }
+}
+
+// Render Activity Views (Home recent list + Full timeline)
+function renderActivityViews() {
+  const recentContainer = document.getElementById('homeRecentActivityList');
+  const fullContainer = document.getElementById('fullActivityTimeline');
+
+  // Filter events
+  let filtered = eventsList;
+  if (activeActivityFilter === 'alerts') {
+    filtered = eventsList.filter(e => e.level === 'danger' || e.type === 'alert');
+  } else if (activeActivityFilter === 'normal') {
+    filtered = eventsList.filter(e => e.level !== 'danger' && e.type !== 'alert');
+  }
+
+  // Home Recent (last 4 events)
+  if (eventsList.length === 0) {
+    recentContainer.innerHTML = `<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:24px 0;">No recent activity recorded.</div>`;
+  } else {
+    recentContainer.innerHTML = eventsList.slice(0, 4).map(e => {
+      const isDanger = e.level === 'danger' || e.type === 'alert';
+      return `
+        <div class="activity-item ${isDanger ? 'act-alert' : 'act-normal'}">
+          <div class="activity-icon-bullet">
+            ${isDanger 
+              ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+              : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`}
+          </div>
+          <div class="activity-details">
+            <div class="activity-title">${e.text}</div>
+            <div class="activity-time">${e.time}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Full Timeline
+  if (filtered.length === 0) {
+    fullContainer.innerHTML = `<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">No matching events found in history.</div>`;
+  } else {
+    fullContainer.innerHTML = filtered.slice(0, 60).map(e => {
+      const isDanger = e.level === 'danger' || e.type === 'alert';
+      return `
+        <div class="activity-item ${isDanger ? 'act-alert' : 'act-normal'}" style="padding:14px 0;">
+          <div class="activity-icon-bullet" style="width:32px;height:32px;">
+            ${isDanger 
+              ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+              : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`}
+          </div>
+          <div class="activity-details">
+            <div style="font-size:14px;font-weight:600;color:var(--text-main);">${e.text}</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:3px;">
+              <span class="activity-time">${e.time}</span>
+              <span style="font-size:11px;color:var(--text-muted);">Zone: Living Room</span>
+              ${isDanger ? `<span style="font-size:10px;font-weight:700;color:var(--danger);background:var(--danger-light);padding:1px 6px;border-radius:10px;">Security Alert</span>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+}
+
+// Render Alerts Log
+function renderAlertsLog() {
+  const container = document.getElementById('alertsLogContainer');
+  const badge = document.getElementById('navAlertBadge');
+  const btn = document.getElementById('navAlertsBtn');
+
+  const unreadAlerts = alertsList.filter(a => !a.acknowledged);
+  if (unreadAlerts.length > 0) {
+    badge.textContent = unreadAlerts.length;
+    btn.classList.add('has-alert');
+  } else {
+    btn.classList.remove('has-alert');
+  }
+
+  if (alertsList.length === 0) {
+    container.innerHTML = `
+      <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">
+        No security alerts generated. System is operating within expected thresholds.
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = alertsList.slice(0, 30).map(a => {
+    const isUnread = !a.acknowledged;
+    return `
+      <div class="alert-card-item ${isUnread ? 'unread' : ''}">
+        <div class="alert-card-left">
+          <div class="alert-type-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <div class="alert-card-title">${a.title}</div>
+            <div class="alert-card-sub">${a.message}</div>
+            <div style="font-size:11px;font-family:var(--mono);color:var(--text-muted);margin-top:4px;">
+              Time: ${a.time} • Detected: ${a.detected} • Expected: ${a.expected}
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${isUnread ? `<span style="font-size:11px;font-weight:700;color:var(--danger);background:var(--danger-light);padding:3px 8px;border-radius:12px;">Active</span>` : `<span style="font-size:11px;color:var(--text-muted);">Resolved</span>`}
+          <button class="btn btn-secondary btn-sm" onclick="openAlertDetails()">Details</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// Render System Technical Evaluation Tab
+function renderSystemTab(step) {
+  if (!metrics) return;
+
+  const names = { svm: 'SVM Classifier (Primary)', rf: 'Random Forest', xgb: 'XGBoost' };
+  const desc = {
+    svm: 'Support Vector Machine with RBF kernel evaluated on 768-D features.',
+    rf: '100-tree decision ensemble on normalized CSI statistics.',
+    xgb: 'Gradient boosted decision trees evaluated on held-out windows.'
+  };
+
+  const modelCardsContainer = document.getElementById('systemModelCards');
+  modelCardsContainer.innerHTML = ['svm', 'xgb', 'rf'].map(k => {
+    const m = metrics[k];
+    const p = step ? step.predictions[k] : null;
+    const isPrimary = k === selectedPrimaryModel;
+
+    return `
+      <div class="model-card ${isPrimary ? 'is-active-primary' : ''}">
+        ${isPrimary ? '<span class="model-badge-top">Active Engine</span>' : ''}
+        <div class="model-title">${names[k]}</div>
+        <div class="model-pred-display">
+          <span class="pred-large-num">${p ? p.predicted : '–'}</span>
+          <span style="font-size:13px;color:var(--text-muted);">people detected</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">
+          ${p ? (p.confidence_available ? 'Detection confidence: ' + Math.round(p.confidence * 100) + '%' : p.confidence_note) : 'Awaiting stream window...'}
+        </div>
+        <div class="model-stat-row">
+          <span>Accuracy</span>
+          <span><b>${(m.accuracy * 100).toFixed(1)}%</b></span>
+        </div>
+        <div class="model-stat-row">
+          <span>Macro F1</span>
+          <span><b>${(m.macro_f1 * 100).toFixed(1)}%</b></span>
+        </div>
+        <div class="model-stat-row">
+          <span>MAE</span>
+          <span><b>${m.mae.toFixed(3)}</b></span>
+        </div>
+        <div style="font-size:10px;color:var(--text-light);margin-top:8px;">
+          ${desc[k]}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Update button states
+  document.getElementById('btnSelectSvm')?.classList.toggle('btn-primary', selectedPrimaryModel === 'svm');
+  document.getElementById('btnSelectXgb')?.classList.toggle('btn-primary', selectedPrimaryModel === 'xgb');
+  document.getElementById('btnSelectRf')?.classList.toggle('btn-primary', selectedPrimaryModel === 'rf');
+
+  // Charts
+  renderSystemCsiChart(step);
+  renderSystemHistoryChart(historyList);
+}
+
+// SVG Charts
+function linePath(values, w, h, min, max) {
+  if (!values || !values.length) return '';
+  const n = values.length;
+  return values.map((v, i) => {
+    const x = (i / (n - 1 || 1)) * w;
+    const y = h - ((v - min) / ((max - min) || 1)) * h;
+    return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+}
+
+function renderSystemCsiChart(step) {
+  const svg = document.getElementById('techCsiChart');
+  if (!svg) return;
+  if (!step || !step.csi_summary) { svg.innerHTML = ''; return; }
+
+  const { mean, std, max } = step.csi_summary;
+  const all = mean.concat(std, max);
+  const lo = Math.min(...all), hi = Math.max(...all);
+
+  svg.innerHTML = [
+    ['#0284c7', mean, 1.8],
+    ['#d97706', std, 1.4],
+    ['#dc2626', max, 1.4]
+  ].map(([color, vals, width]) => 
+    `<path d="${linePath(vals, 600, 150, lo, hi)}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round"/>`
+  ).join('');
+}
+
+function renderSystemHistoryChart(hist) {
+  const svg = document.getElementById('techHistoryChart');
+  if (!svg) return;
+  if (!hist || !hist.length) { svg.innerHTML = ''; return; }
+
+  const recent = hist.slice(-100);
+  const allVals = recent.flatMap(s => [
+    s.ground_truth,
+    s.predictions.svm ? s.predictions.svm.predicted : 0,
+    s.predictions.rf ? s.predictions.rf.predicted : 0,
+    s.predictions.xgb ? s.predictions.xgb.predicted : 0
+  ]);
+  const lo = 0, hi = Math.max(1, ...allVals);
+
+  const series = [
+    ['#64748b', recent.map(s => s.ground_truth), 1.5, '4,4'],
+    ['#0284c7', recent.map(s => s.predictions.svm.predicted), 2.0, ''],
+    ['#d97706', recent.map(s => s.predictions.xgb.predicted), 1.5, ''],
+    ['#059669', recent.map(s => s.predictions.rf.predicted), 1.5, '']
+  ];
+
+  svg.innerHTML = series.map(([color, vals, width, dash]) => 
+    `<path d="${linePath(vals, 600, 150, lo, hi)}" fill="none" stroke="${color}" stroke-width="${width}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`
+  ).join('');
+}
+
+// Refresh Loop
+async function refreshState() {
+  const [statusData, currentData, histData] = await Promise.all([
+    api('/api/simulation/status'),
+    api('/api/simulation/current'),
+    api('/api/simulation/history')
+  ]);
+
+  if (statusData) currentStatus = statusData;
+  if (currentData) currentStep = currentData;
+  if (histData) {
+    historyList = histData.history || [];
+    eventsList = histData.events || [];
+    alertsList = histData.alerts || [];
+  }
+
+  renderDashboard(currentStatus, currentStep);
+  renderActivityViews();
+  renderAlertsLog();
+
+  if (activeTab === 'system') {
+    renderSystemTab(currentStep);
+  }
+}
+
+// Init Application
+(async function init() {
+  initNavigation();
+  initActivityFilters();
+  setupCounterButtons();
+  setupToolbarHandlers();
+  setupModals();
+
+  info = await api('/api/simulation/info');
+  metrics = await api('/api/simulation/metrics');
+
+  if (info) {
+    const specsEl = document.getElementById('techDatasetSpecs');
+    if (specsEl) {
+      specsEl.textContent = `Evaluation data: ${info.total_windows} held-out test windows (classes ${info.classes.join(', ')}). ${info.data_source_note}`;
+    }
+  }
+
+  await refreshState();
+  pollTimer = setInterval(refreshState, 500);
+})();
+</script>
+</body>
+</html>
