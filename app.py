@@ -162,15 +162,15 @@ def run_step(index):
         prev_pred = prev["predictions"][primary_key]["predicted"] if prev else None
         prev_alert = (prev_pred > expected) if prev_pred is not None else False
 
-        # Human-friendly event and alert generation
+        # Simple, human-friendly events and alerts
         if alert:
             if not prev_alert or (prev_pred is not None and primary_pred > prev_pred):
                 state["alerts"].append({
                     "id": f"alert-{index}-{int(time.time()*1000)}",
                     "time": step["timestamp"],
                     "type": "unexpected_occupancy",
-                    "title": "Unexpected occupancy detected",
-                    "message": f"{primary_pred} people detected at home. Expected maximum is {expected} people.",
+                    "title": "Unexpected occupancy",
+                    "message": f"{primary_pred} people detected at home. Expected maximum: {expected} people.",
                     "detected": primary_pred,
                     "expected": expected,
                     "level": "danger",
@@ -178,7 +178,8 @@ def run_step(index):
                 })
             state["events"].append({
                 "time": step["timestamp"],
-                "text": f"{primary_pred} people detected — Unexpected occupancy",
+                "text": f"{primary_pred} people detected",
+                "status": "Unexpected occupancy",
                 "level": "danger",
                 "type": "alert",
                 "count": primary_pred
@@ -189,7 +190,7 @@ def run_step(index):
                 "time": step["timestamp"],
                 "type": "occupancy_normal",
                 "title": "Occupancy returned to normal",
-                "message": f"Detected occupancy returned to {primary_pred} people (within threshold of {expected}).",
+                "message": f"{primary_pred} people detected (normal).",
                 "detected": primary_pred,
                 "expected": expected,
                 "level": "success",
@@ -197,15 +198,8 @@ def run_step(index):
             })
             state["events"].append({
                 "time": step["timestamp"],
-                "text": f"{primary_pred} people detected — Occupancy returned to normal",
-                "level": "info",
-                "type": "normal",
-                "count": primary_pred
-            })
-        elif prev_pred is not None and prev_pred == 0 and primary_pred > 0:
-            state["events"].append({
-                "time": step["timestamp"],
-                "text": f"{primary_pred} people detected — Home occupied",
+                "text": f"{primary_pred} people detected",
+                "status": "Normal",
                 "level": "info",
                 "type": "normal",
                 "count": primary_pred
@@ -213,15 +207,17 @@ def run_step(index):
         elif prev_pred is not None and prev_pred > 0 and primary_pred == 0:
             state["events"].append({
                 "time": step["timestamp"],
-                "text": "0 people detected — Home is empty",
+                "text": "No people detected",
+                "status": "Normal",
                 "level": "info",
                 "type": "normal",
-                "count": primary_pred
+                "count": 0
             })
         elif prev_pred is not None and primary_pred != prev_pred:
             state["events"].append({
                 "time": step["timestamp"],
                 "text": f"{primary_pred} people detected",
+                "status": "Normal",
                 "level": "info",
                 "type": "normal",
                 "count": primary_pred
@@ -229,7 +225,8 @@ def run_step(index):
         elif not prev:
             state["events"].append({
                 "time": step["timestamp"],
-                "text": f"{primary_pred} people detected — Monitoring active",
+                "text": f"{primary_pred} people detected",
+                "status": "Normal",
                 "level": "info",
                 "type": "normal",
                 "count": primary_pred
@@ -318,7 +315,8 @@ def start():
         state["running"] = True
         state["events"].append({
             "time": time.strftime("%H:%M:%S"),
-            "text": f"Night monitoring started (Expected: {state['expected_occupancy']} people)",
+            "text": "Night monitoring started",
+            "status": "Active",
             "level": "info",
             "type": "system"
         })
@@ -339,6 +337,7 @@ def pause():
         state["events"].append({
             "time": time.strftime("%H:%M:%S"),
             "text": "Monitoring paused",
+            "status": "Paused",
             "level": "info",
             "type": "system"
         })
